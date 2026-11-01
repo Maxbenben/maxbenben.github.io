@@ -3,60 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Приглашение в проект</title>
+    <title>Переход в Telegram</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
             text-align: center;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            max-width: 400px;
-            width: 90%;
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 24px;
-        }
-        p {
-            font-size: 16px;
-            line-height: 1.5;
-            margin-bottom: 20px;
+            padding: 50px 20px;
+            background-color: #f4f4f9;
         }
         .btn {
             display: inline-block;
-            background-color: #007bff;
+            background-color: #0088cc; /* Цвет Telegram */
             color: white;
-            padding: 12px 24px;
+            padding: 15px 30px;
             text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 18px;
+            margin-top: 20px;
         }
-        .btn:hover {
-            background-color: #0056b3;
+        #fallback {
+            display: none; /* Скрыто по умолчанию */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Добро пожаловать!</h1>
-        <p>Это тестовая страница для нашего учебного проекта.</p>
-        <p>Сайт успешно настроен и работает через GitHub Pages.</p>
-        
-        <!-- Сюда потом можно будет вставить ссылку на скачивание APK или RuStore -->
-        <a href="#" class="btn">Скачать приложение (скоро)</a>
+
+    <h2>Открываем Telegram...</h2>
+    
+    <!-- Блок, который появится, если Telegram не установлен -->
+    <div id="fallback">
+        <p>Если Telegram не открылся автоматически, нажмите кнопку ниже:</p>
+        <!-- Вставьте сюда ссылку на ваш APK или RuStore, когда он будет готов -->
+        <a href="https://t.me/ваш_ник" class="btn">Открыть Telegram вручную</a>
     </div>
+
+    <script>
+        // 1. Настройте здесь вашу ссылку для Telegram
+        // Например, чтобы открыть бота: "tg://resolve?domain=имя_бота"
+        // Например, чтобы открыть чат по ссылке: "tg://msg_url?url=https://t.me/..."
+        var telegramScheme = "tg://resolve?domain=durov"; // Пример: открывает профиль Павла Дурова
+
+        // 2. Пытаемся открыть приложение
+        window.location.href = telegramScheme;
+
+        // 3. Если приложение не открылось за 2.5 секунды, показываем кнопку
+        setTimeout(function() {
+            document.getElementById("fallback").style.display = "block";
+            document.querySelector("h2").innerText = "Telegram не найден";
+        }, 2500);
+    </script>
 
 </body>
 </html>
