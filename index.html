@@ -23,15 +23,26 @@
             text-decoration: none; 
             border-radius: 8px; 
             font-size: 18px; 
-            margin-top: 20px; 
+            margin-top: 10px; 
             border: none;
             cursor: pointer;
+        }
+        .btn-download {
+            background-color: #28a745; /* Зеленый цвет для скачивания */
         }
         #desktop-warning { 
             display: none; 
             background: #ffeeba; 
             padding: 20px; 
             border-radius: 8px; 
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -45,17 +56,24 @@
 
     <!-- Блок для телефонов -->
     <div id="mobile-content" class="hidden">
-        <h1 id="main-title">Открываем приложение...</h1>
-        
-        <div id="not-installed-msg" class="hidden" style="margin-top: 20px;">
-            <p><strong>Приложение не установлено.</strong></p>
-            <p>Пожалуйста, сначала установите APK-файл.</p>
-        </div>
+        <div class="card">
+            <h1 id="main-title">Открываем приложение...</h1>
+            
+            <p id="status-text" style="color: #666;">Подождите пару секунд...</p>
 
-        <div id="manual-open" class="hidden">
-            <p>Если приложение уже установлено, нажмите кнопку ниже:</p>
-            <!-- Вот эта кнопка теперь использует кастомную схему testlinks:// -->
-            <a href="#" id="open-app-btn" class="btn">Открыть приложение</a>
+            <!-- Блок, который появится, если приложение не установлено -->
+            <div id="download-area" class="hidden" style="margin-top: 20px;">
+                <p><strong>Приложение не установлено</strong></p>
+                <p>Скачайте APK-файл, чтобы присоединиться:</p>
+                <!-- Ссылка на ваш релиз -->
+                <a href="https://github.com/Maxbenben/maxbenben.github.io/releases/download/v1/Testlinks.apk" class="btn btn-download">Скачать APK</a>
+            </div>
+
+            <!-- Кнопка ручного открытия, если автопереход не сработал, но приложение есть -->
+            <div id="manual-open" class="hidden" style="margin-top: 20px;">
+                <p>Если приложение уже установлено, нажмите кнопку ниже:</p>
+                <a href="#" id="open-app-btn" class="btn">Открыть приложение</a>
+            </div>
         </div>
     </div>
 
@@ -71,30 +89,36 @@
             document.getElementById('mobile-content').classList.remove('hidden');
             
             if (inviteCode) {
-                // ВАЖНО: Используем кастомную схему testlinks://
+                // Формируем ссылку через кастомную схему для запуска приложения
                 const appLink = `testlinks://invite?code=${inviteCode}`;
                 document.getElementById('open-app-btn').href = appLink;
 
                 if (!hasTriedToOpen) {
                     sessionStorage.setItem('tried_to_open', 'true');
                     
-                    // Пытаемся открыть приложение автоматически
+                    // Пытаемся автоматически открыть приложение
                     window.location.href = appLink;
 
-                    // Если приложение не открылось за 2.5 секунды, показываем запасной вариант
+                    // Если приложение не открылось за 2.5 секунды, показываем варианты
                     setTimeout(() => {
-                        document.getElementById('not-installed-msg').classList.remove('hidden');
-                        document.getElementById('manual-open').classList.remove('hidden');
+                        // Меняем заголовок и текст
                         document.getElementById('main-title').innerText = "Приложение не найдено";
+                        document.getElementById('status-text').innerText = "Возможно, оно еще не установлено.";
+                        
+                        // Показываем кнопку скачивания и кнопку ручного открытия
+                        document.getElementById('download-area').classList.remove('hidden');
+                        document.getElementById('manual-open').classList.remove('hidden');
                     }, 2500);
                 } else {
-                    // Если это перезагрузка (нас вернуло обратно), сразу показываем кнопку
-                    document.getElementById('not-installed-msg').classList.remove('hidden');
-                    document.getElementById('manual-open').classList.remove('hidden');
+                    // Если это перезагрузка страницы (нас вернуло обратно)
                     document.getElementById('main-title').innerText = "Приложение не найдено";
+                    document.getElementById('status-text').innerText = "Возможно, оно еще не установлено.";
+                    document.getElementById('download-area').classList.remove('hidden');
+                    document.getElementById('manual-open').classList.remove('hidden');
                 }
             } else {
-                document.getElementById('main-title').innerText = "Код приглашения не найден в ссылке.";
+                document.getElementById('main-title').innerText = "Ошибка";
+                document.getElementById('status-text').innerText = "В ссылке отсутствует код приглашения.";
             }
         } else {
             document.getElementById('desktop-warning').style.display = 'block';
