@@ -5,19 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Приглашение в Testlinks</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; color: #333; }
-        .hidden { display: none !important; }
-        .btn { display: inline-block; background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 18px; margin-top: 20px; }
-        #desktop-warning { display: none; background: #ffeeba; padding: 20px; border-radius: 8px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 50px 20px; 
+            background-color: #f4f4f9; 
+            color: #333; 
+        }
+        .hidden { 
+            display: none !important; 
+        }
+        .btn { 
+            display: inline-block; 
+            background-color: #007bff; 
+            color: white; 
+            padding: 15px 30px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            margin-top: 20px; 
+            border: none;
+            cursor: pointer;
+        }
+        #desktop-warning { 
+            display: none; 
+            background: #ffeeba; 
+            padding: 20px; 
+            border-radius: 8px; 
+        }
     </style>
 </head>
 <body>
 
+    <!-- Блок для ПК -->
     <div id="desktop-warning">
         <h2>📱 Откройте ссылку с телефона</h2>
         <p>Это приложение работает только на Android.</p>
     </div>
 
+    <!-- Блок для телефонов -->
     <div id="mobile-content" class="hidden">
         <h1 id="main-title">Открываем приложение...</h1>
         
@@ -28,6 +54,7 @@
 
         <div id="manual-open" class="hidden">
             <p>Если приложение уже установлено, нажмите кнопку ниже:</p>
+            <!-- Вот эта кнопка теперь использует кастомную схему testlinks:// -->
             <a href="#" id="open-app-btn" class="btn">Открыть приложение</a>
         </div>
     </div>
@@ -44,19 +71,24 @@
             document.getElementById('mobile-content').classList.remove('hidden');
             
             if (inviteCode) {
-                const appLink = `https://maxbenben.github.io/?code=${inviteCode}`;
+                // ВАЖНО: Используем кастомную схему testlinks://
+                const appLink = `testlinks://invite?code=${inviteCode}`;
                 document.getElementById('open-app-btn').href = appLink;
 
                 if (!hasTriedToOpen) {
                     sessionStorage.setItem('tried_to_open', 'true');
+                    
+                    // Пытаемся открыть приложение автоматически
                     window.location.href = appLink;
 
+                    // Если приложение не открылось за 2.5 секунды, показываем запасной вариант
                     setTimeout(() => {
                         document.getElementById('not-installed-msg').classList.remove('hidden');
                         document.getElementById('manual-open').classList.remove('hidden');
                         document.getElementById('main-title').innerText = "Приложение не найдено";
-                    }, 2000);
+                    }, 2500);
                 } else {
+                    // Если это перезагрузка (нас вернуло обратно), сразу показываем кнопку
                     document.getElementById('not-installed-msg').classList.remove('hidden');
                     document.getElementById('manual-open').classList.remove('hidden');
                     document.getElementById('main-title').innerText = "Приложение не найдено";
