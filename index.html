@@ -58,18 +58,20 @@
     <div id="mobile-content" class="hidden">
         <div class="card">
             <h1 id="main-title">Открываем приложение...</h1>
-            
             <p id="status-text" style="color: #666;">Подождите пару секунд...</p>
 
             <!-- Блок, который появится, если приложение не установлено -->
             <div id="download-area" class="hidden" style="margin-top: 20px;">
                 <p><strong>Приложение не установлено</strong></p>
-                <p>Скачайте APK-файл, чтобы присоединиться:</p>
+                <p style="font-size: 14px; color: #555;">
+                    Мы <b>скопировали ссылку с кодом</b> в буфер обмена. 
+                    После установки приложение автоматически считает его!
+                </p>
                 <!-- Ссылка на ваш релиз -->
                 <a href="https://github.com/Maxbenben/maxbenben.github.io/releases/download/v1/Testlinks.apk" class="btn btn-download">Скачать APK</a>
             </div>
 
-            <!-- Кнопка ручного открытия, если автопереход не сработал, но приложение есть -->
+            <!-- Кнопка ручного открытия -->
             <div id="manual-open" class="hidden" style="margin-top: 20px;">
                 <p>Если приложение уже установлено, нажмите кнопку ниже:</p>
                 <a href="#" id="open-app-btn" class="btn">Открыть приложение</a>
@@ -89,6 +91,9 @@
             document.getElementById('mobile-content').classList.remove('hidden');
             
             if (inviteCode) {
+                // Формируем полную ссылку для копирования в буфер
+                const fullInviteLink = `https://maxbenben.github.io/?code=${inviteCode}`;
+                
                 // Формируем ссылку через кастомную схему для запуска приложения
                 const appLink = `testlinks://invite?code=${inviteCode}`;
                 document.getElementById('open-app-btn').href = appLink;
@@ -96,16 +101,24 @@
                 if (!hasTriedToOpen) {
                     sessionStorage.setItem('tried_to_open', 'true');
                     
+                    // КОПИРУЕМ ССЫЛКУ В БУФЕР ОБМЕНА
+                    // Используем try-catch, так как некоторые браузеры блокируют копирование без явного клика
+                    try {
+                        navigator.clipboard.writeText(fullInviteLink).then(() => {
+                            console.log('Ссылка скопирована в буфер');
+                        });
+                    } catch (e) {
+                        console.log('Не удалось скопировать автоматически', e);
+                    }
+
                     // Пытаемся автоматически открыть приложение
                     window.location.href = appLink;
 
                     // Если приложение не открылось за 2.5 секунды, показываем варианты
                     setTimeout(() => {
-                        // Меняем заголовок и текст
                         document.getElementById('main-title').innerText = "Приложение не найдено";
                         document.getElementById('status-text').innerText = "Возможно, оно еще не установлено.";
                         
-                        // Показываем кнопку скачивания и кнопку ручного открытия
                         document.getElementById('download-area').classList.remove('hidden');
                         document.getElementById('manual-open').classList.remove('hidden');
                     }, 2500);
