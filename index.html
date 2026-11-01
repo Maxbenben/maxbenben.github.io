@@ -3,38 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Запуск калькулятора</title>
+    <title>Приглашение в Testlinks</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; color: #333; }
-        .btn { display: inline-block; background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 18px; margin-top: 20px; }
         .hidden { display: none !important; }
+        .btn { display: inline-block; background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 18px; margin-top: 20px; }
+        #desktop-warning { display: none; background: #ffeeba; padding: 20px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <h1 id="title">Пытаемся запустить калькулятор...</h1>
-    
-    <div id="fallback" class="hidden">
-        <p>Автоматически открыть калькулятор не удалось.</p>
-        <p>Нажмите кнопку ниже (сработает в Chrome).</p>
-        <!-- Формат intent:// специально для Android -->
-        <a href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALCULATOR;end" class="btn">Открыть калькулятор</a>
+    <div id="desktop-warning">
+        <h2>📱 Откройте ссылку с телефона</h2>
+        <p>Это приложение работает только на Android.</p>
+    </div>
+
+    <div id="mobile-content" class="hidden">
+        <h1 id="main-title">Открываем приложение...</h1>
+        
+        <div id="not-installed-msg" class="hidden" style="margin-top: 20px;">
+            <p><strong>Приложение не установлено.</strong></p>
+            <p>Пожалуйста, сначала установите APK-файл.</p>
+        </div>
+
+        <div id="manual-open" class="hidden">
+            <p>Если приложение уже установлено, нажмите кнопку ниже:</p>
+            <a href="#" id="open-app-btn" class="btn">Открыть приложение</a>
+        </div>
     </div>
 
     <script>
-        const isMobile = /Android/i.test(navigator.userAgent);
+        // Получаем код приглашения из адресной строки
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteCode = urlParams.get('code') || '';
+        
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const hasTriedToOpen = sessionStorage.getItem('tried_to_open');
 
         if (isMobile) {
-            // Эта строка пытается вызвать калькулятор через Android Intent (работает в Chrome)
-            window.location.href = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALCULATOR;end";
+            document.getElementById('mobile-content').classList.remove('hidden');
+            
+            if (inviteCode) {
+                const appLink = `https://maxbenben.github.io/?code=${inviteCode}`;
+                document.getElementById('open-app-btn').href = appLink;
 
-            // Если через 2.5 секунды мы все еще на странице, значит переход не сработал
-            setTimeout(() => {
-                document.getElementById('title').innerText = "Ожидание...";
-                document.getElementById('fallback').classList.remove('hidden');
-            }, 2500);
+                if (!hasTriedToOpen) {
+                    sessionStorage.setItem('tried_to_open', 'true');
+                    window.location.href = appLink;
+
+                    setTimeout(() => {
+                        document.getElementById('not-installed-msg').classList.remove('hidden');
+                        document.getElementById('manual-open').classList.remove('hidden');
+                        document.getElementById('main-title').innerText = "Приложение не найдено";
+                    }, 2000);
+                } else {
+                    document.getElementById('not-installed-msg').classList.remove('hidden');
+                    document.getElementById('manual-open').classList.remove('hidden');
+                    document.getElementById('main-title').innerText = "Приложение не найдено";
+                }
+            } else {
+                document.getElementById('main-title').innerText = "Код приглашения не найден в ссылке.";
+            }
         } else {
-            document.getElementById('title').innerText = "Откройте эту страницу на Android-телефоне.";
+            document.getElementById('desktop-warning').style.display = 'block';
         }
     </script>
 </body>
