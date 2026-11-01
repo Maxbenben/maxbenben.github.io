@@ -5,98 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Открытие приложения</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px 20px;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        .btn {
-            display: inline-block;
-            background-color: #007bff;
-            color: white;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 18px;
-            margin-top: 20px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        #desktop-warning { 
-            display: none; 
-            background: #ffeeba; 
-            padding: 20px; 
-            border-radius: 8px; 
-        }
-        #mobile-content { 
-            display: none; 
-        }
-        .hidden {
-            display: none !important;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; color: #333; }
+        .hidden { display: none !important; }
+        .btn { display: inline-block; background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 18px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- Блок для ПК -->
-    <div id="desktop-warning">
+    <div id="desktop-warning" style="display:none; background: #ffeeba; padding: 20px; border-radius: 8px;">
         <h2>📱 Откройте ссылку с телефона</h2>
-        <p>Это приложение работает только на Android.</p>
+        <p>Приложение работает только на Android.</p>
     </div>
 
-    <!-- Блок для телефонов -->
-    <div id="mobile-content">
+    <div id="mobile-content" style="display:none;">
         <h1>Открываем приложение...</h1>
         
-        <!-- Сообщение, если приложение не установлено -->
-        <div id="not-installed-msg" class="hidden">
-            <p>Приложение не установлено на этом устройстве.</p>
-            <p>Пожалуйста, сначала установите APK-файл.</p>
+        <div id="not-installed-msg" class="hidden" style="margin-top: 20px;">
+            <p>Приложение не установлено.</p>
+            <p>Сначала установите APK-файл.</p>
         </div>
 
-        <!-- Кнопка для ручного открытия (если автопереход не сработал) -->
-        <div id="manual-open" class="hidden" style="margin-top: 20px;">
-            <p>Если приложение не открылось автоматически, нажмите кнопку ниже:</p>
-            <a href="#" id="open-app-btn" class="btn">Открыть приложение</a>
+        <div id="manual-open" class="hidden">
+            <p>Если приложение не открылось автоматически, нажмите:</p>
+            <a href="#" id="open-app-btn" class="btn">Открыть вручную</a>
         </div>
     </div>
 
     <script>
-        // Получаем параметр code из URL (например, ?code=123)
+        // Берем код из параметров текущего URL (например, из ?code=TEST123)
         const urlParams = new URLSearchParams(window.location.search);
-        const inviteCode = urlParams.get('code') || 'DEFAULT_CODE';
-        
-        // Формируем ссылку, которая должна открыть приложение
-        const appLink = `https://maxbenben.github.io/invite?code=${inviteCode}`;
+        const inviteCode = urlParams.get('code');
 
-        // Проверяем, мобильное ли это устройство
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         if (isMobile) {
             document.getElementById('mobile-content').style.display = 'block';
             
-            // Настраиваем кнопку ручного открытия
-            const openBtn = document.getElementById('open-app-btn');
-            openBtn.href = appLink;
+            if (inviteCode) {
+                // Собираем ссылку для вызова приложения (тот же домен и тот же код)
+                const appLink = `https://maxbenben.github.io/?code=${inviteCode}`;
+                document.getElementById('open-app-btn').href = appLink;
 
-            // Пытаемся автоматически открыть приложение
-            window.location.href = appLink;
+                // Пробуем открыть приложение
+                window.location.href = appLink;
 
-            // Если приложение не установлено, браузер останется на этой странице.
-            // Через 2 секунды показываем сообщение "не установлено" и кнопку ручного открытия.
-            setTimeout(() => {
-                document.getElementById('not-installed-msg').classList.remove('hidden');
-                document.getElementById('manual-open').classList.remove('hidden');
-                document.querySelector('h1').innerText = "Ожидание...";
-            }, 2000);
-
+                // Если приложение не установилось, показываем сообщение
+                setTimeout(() => {
+                    document.getElementById('not-installed-msg').classList.remove('hidden');
+                    document.getElementById('manual-open').classList.remove('hidden');
+                    document.querySelector('h1').innerText = "Ожидание...";
+                }, 2000);
+            } else {
+                document.querySelector('h1').innerText = "Код приглашения не найден в ссылке.";
+            }
         } else {
-            // Если это ПК, показываем предупреждение
             document.getElementById('desktop-warning').style.display = 'block';
         }
     </script>
