@@ -11,7 +11,8 @@
         .btn-download { background-color: #28a745; }
         #desktop-warning { display: none; background: #ffeeba; padding: 20px; border-radius: 8px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        .copy-success { color: #28a745; font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
+        .hint-text { font-size: 14px; color: #555; margin-bottom: 15px; }
+        .copy-success { color: #28a745; font-size: 14px; margin-top: 15px; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -31,17 +32,17 @@
             <!-- Блок, который появится, если приложение не установлено -->
             <div id="download-area" class="hidden" style="margin-top: 20px;">
                 <p><strong>Приложение не установлено</strong></p>
-                <p style="font-size: 14px; color: #555;">
-                    Нажмите кнопку ниже. Ссылка с кодом скопируется автоматически, и приложение её считает!
+                <p class="hint-text">
+                    Нажмите «Скачать APK». Ссылка с кодом автоматически скопируется, и приложение считает её после установки.
                 </p>
                 
-                <!-- Ссылка на ваш релиз -->
+                <!-- Кнопка скачивания, которая также копирует ссылку -->
                 <a href="https://github.com/Maxbenben/maxbenben.github.io/releases/download/v1/Testlinks.apk" 
                    id="download-btn" 
                    class="btn btn-download">Скачать APK</a>
                    
                 <div id="copy-notification" class="copy-success">
-                    ✅ Ссылка скопирована!
+                    ✅ Ссылка с кодом скопирована!
                 </div>
             </div>
 
@@ -60,36 +61,6 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const hasTriedToOpen = sessionStorage.getItem('tried_to_open');
 
-        // НАДЕЖНАЯ ФУНКЦИЯ КОПИРОВАНИЯ (РАБОТАЕТ ВЕЗДЕ)
-        function copyToClipboard(text) {
-            // Создаем временное текстовое поле
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            
-            // Делаем его невидимым
-            textArea.style.position = "fixed";
-            textArea.style.top = "-999px";
-            textArea.style.left = "-999px";
-            document.body.appendChild(textArea);
-            
-            // Выделяем текст
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                // Выполняем команду копирования (работает в 99% браузеров)
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    console.log('Скопировано через execCommand');
-                }
-            } catch (err) {
-                console.error('Ошибка копирования: ', err);
-            }
-            
-            // Удаляем поле
-            document.body.removeChild(textArea);
-        }
-
         if (isMobile) {
             document.getElementById('mobile-content').classList.remove('hidden');
             
@@ -98,16 +69,30 @@
                 const appLink = `testlinks://invite?code=${inviteCode}`;
                 document.getElementById('open-app-btn').href = appLink;
 
-                // ОБРАБОТЧИК КЛИКА
-                document.getElementById('download-btn').addEventListener('click', function(e) {
-                    
-                    // Копируем надежным способом
-                    copyToClipboard(fullInviteLink);
-                    
-                    // Показываем сообщение, что скопировано
-                    document.getElementById('copy-notification').style.display = 'block';
-                    
-                    // Не отменяем переход по ссылке (скачивание начнется сразу)
+                // ОБРАБОТЧИК КЛИКА ПО КНОПКЕ "СКАЧАТЬ APK"
+                const downloadBtn = document.getElementById('download-btn');
+                downloadBtn.addEventListener('click', function(e) {
+                    // 1. Блокируем стандартный переход по ссылке на мгновение
+                    e.preventDefault();
+                    const targetUrl = this.href;
+
+                    // 2. Копируем ссылку в буфер
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(fullInviteLink).then(() => {
+                            // Успех
+                            document.getElementById('copy-notification').style.display = 'block';
+                        }).catch(err => {
+                            // Если API заблокировано, используем старый метод
+                            fallbackCopyTextToClipboard(fullInviteLink);
+                        });
+                    } else {
+                        fallbackCopyTextToClipboard(fullInviteLink);
+                    }
+
+                    // 3. Даем время буферу обновиться и запускаем скачивание
+                    setTimeout(() => {
+                        window.location.href = targetUrl;
+                    }, 300); // Задержка 300 мс
                 });
 
                 if (!hasTriedToOpen) {
@@ -132,6 +117,25 @@
             }
         } else {
             document.getElementById('desktop-warning').style.display = 'block';
+        }
+
+        // РЕЗЕРВНЫЙ МЕТОД КОПИРОВАНИЯ
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "-999px";
+            textArea.style.left = "-999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                document.getElementById('copy-notification').style.display = 'block';
+            } catch (err) {
+                console.error('Не удалось скопировать', err);
+            }
+            document.body.removeChild(textArea);
         }
     </script>
 </body>
