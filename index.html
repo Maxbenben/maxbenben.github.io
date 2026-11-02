@@ -12,7 +12,6 @@
         #desktop-warning { display: none; background: #ffeeba; padding: 20px; border-radius: 8px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
         .hint-text { font-size: 14px; color: #555; margin-bottom: 15px; }
-        .copy-success { color: #28a745; font-size: 14px; margin-top: 15px; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -33,17 +32,13 @@
             <div id="download-area" class="hidden" style="margin-top: 20px;">
                 <p><strong>Приложение не установлено</strong></p>
                 <p class="hint-text">
-                    Нажмите «Скачать APK». Ссылка с кодом автоматически скопируется, и приложение считает её после установки.
+                    Нажмите кнопку ниже, чтобы скачать приложение.
                 </p>
                 
-                <!-- Кнопка скачивания, которая также копирует ссылку -->
+                <!-- Кнопка скачивания, которая также копирует ссылку в фоне -->
                 <a href="https://github.com/Maxbenben/maxbenben.github.io/releases/download/v1/Testlinks.apk" 
                    id="download-btn" 
                    class="btn btn-download">Скачать APK</a>
-                   
-                <div id="copy-notification" class="copy-success">
-                    ✅ Ссылка с кодом скопирована!
-                </div>
             </div>
 
             <!-- Кнопка ручного открытия -->
@@ -72,27 +67,23 @@
                 // ОБРАБОТЧИК КЛИКА ПО КНОПКЕ "СКАЧАТЬ APK"
                 const downloadBtn = document.getElementById('download-btn');
                 downloadBtn.addEventListener('click', function(e) {
-                    // 1. Блокируем стандартный переход по ссылке на мгновение
                     e.preventDefault();
                     const targetUrl = this.href;
 
-                    // 2. Копируем ссылку в буфер
+                    // Копируем в фоне
                     if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(fullInviteLink).then(() => {
-                            // Успех
-                            document.getElementById('copy-notification').style.display = 'block';
-                        }).catch(err => {
-                            // Если API заблокировано, используем старый метод
+                        navigator.clipboard.writeText(fullInviteLink).catch(err => {
+                            // Если не удалось современным методом, пробуем старый
                             fallbackCopyTextToClipboard(fullInviteLink);
                         });
                     } else {
                         fallbackCopyTextToClipboard(fullInviteLink);
                     }
 
-                    // 3. Даем время буферу обновиться и запускаем скачивание
+                    // Запускаем скачивание через 300 мс
                     setTimeout(() => {
                         window.location.href = targetUrl;
-                    }, 300); // Задержка 300 мс
+                    }, 300); 
                 });
 
                 if (!hasTriedToOpen) {
@@ -119,7 +110,7 @@
             document.getElementById('desktop-warning').style.display = 'block';
         }
 
-        // РЕЗЕРВНЫЙ МЕТОД КОПИРОВАНИЯ
+        // Резервный метод копирования (без вывода сообщений)
         function fallbackCopyTextToClipboard(text) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
@@ -131,9 +122,8 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                document.getElementById('copy-notification').style.display = 'block';
             } catch (err) {
-                console.error('Не удалось скопировать', err);
+                console.log('Ошибка фонового копирования', err);
             }
             document.body.removeChild(textArea);
         }
